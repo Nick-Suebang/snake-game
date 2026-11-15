@@ -49,7 +49,7 @@ EM_JS(int, js_flecheAppuyee, (int code), {
 
 bool InitialiserFenetre(int largeur, int hauteur, const std::string& titreFenetre)
 {
-    if (largeur > CAPACITE_GRILLE || hauteur > CAPACITE_GRILLE)
+    if (largeur <= 0 || hauteur <= 0 || largeur > CAPACITE_GRILLE || hauteur > CAPACITE_GRILLE)
     {
         return false;
     }
