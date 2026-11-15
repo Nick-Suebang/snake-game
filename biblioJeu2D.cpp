@@ -1,88 +1,93 @@
-#include "biblioJeu2D.h"
+﻿#include "biblioJeu2D.h"
+
+#include <memory>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 
-static const int CAPACITE_GRILLE{ 100 };
-static const int TAILLE_CELLULE{ 30 };
-static const sf::Color COULEUR_VIDE{ sf::Color(0, 0, 0, 255) };
-
-static int hauteurGrille{ 0 };
-static int largeurGrille{ 0 };
-static sf::RenderWindow* fenetreSFML{ nullptr };
-static sf::Color** couleurs{ nullptr };
-static sf::Clock horloge{ };
-
-bool InitialiserFenetre(int largeur, int hauteur, const std::string & titreFenetre)
+namespace
 {
-    if (largeur > CAPACITE_GRILLE || hauteur > CAPACITE_GRILLE)
+    constexpr int CAPACITE_GRILLE{ 100 };
+    constexpr float TAILLE_CELLULE{ 30.f };
+    const sf::Color COULEUR_VIDE{ sf::Color::Black };
+
+    int largeurGrille{ 0 };
+    int hauteurGrille{ 0 };
+    std::unique_ptr<sf::RenderWindow> fenetre;
+    std::vector<sf::Color> couleurs; // une couleur par cellule, indice y * largeurGrille + x
+    sf::Clock horloge;
+
+    bool EstDansLaGrille(int x, int y)
+    {
+        return x >= 0 && x < largeurGrille && y >= 0 && y < hauteurGrille;
+    }
+
+    // Produit false si l'utilisateur a fermé la fenêtre.
+    bool TraiterEvenements()
+    {
+        sf::Event evenement;
+        while (fenetre->pollEvent(evenement))
+        {
+            if (evenement.type == sf::Event::Closed)
+            {
+                fenetre->close();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void DessinerGrille()
+    {
+        sf::RectangleShape cellule(sf::Vector2f(TAILLE_CELLULE, TAILLE_CELLULE));
+        for (int y{ 0 }; y < hauteurGrille; ++y)
+        {
+            for (int x{ 0 }; x < largeurGrille; ++x)
+            {
+                cellule.setPosition(x * TAILLE_CELLULE, y * TAILLE_CELLULE);
+                cellule.setFillColor(couleurs[y * largeurGrille + x]);
+                fenetre->draw(cellule);
+            }
+        }
+    }
+}
+
+bool InitialiserFenetre(int largeur, int hauteur, const std::string& titreFenetre)
+{
+    if (largeur <= 0 || hauteur <= 0 || largeur > CAPACITE_GRILLE || hauteur > CAPACITE_GRILLE)
     {
         return false;
     }
 
     largeurGrille = largeur;
     hauteurGrille = hauteur;
+    couleurs.assign(largeur * hauteur, COULEUR_VIDE);
 
-	couleurs = new sf::Color* [largeurGrille];
-    for (int i = 0; i < largeurGrille; ++i)
-    {
-        couleurs[i] = new sf::Color[hauteurGrille];
-    }
-
-    for (int i = 0; i < largeurGrille; ++i)
-    {
-        for (int j = 0; j < hauteurGrille; ++j)
-        {
-            couleurs[i][j] = COULEUR_VIDE;
-        }
-    }
-
-    const int largeurFenetre = largeurGrille * TAILLE_CELLULE;
-    const int hauteurFenetre = hauteurGrille * TAILLE_CELLULE;
-    fenetreSFML = new sf::RenderWindow(sf::VideoMode(largeurFenetre, hauteurFenetre), titreFenetre);
-	horloge = sf::Clock();
+    const sf::VideoMode taille(static_cast<unsigned int>(largeur * TAILLE_CELLULE),
+                               static_cast<unsigned int>(hauteur * TAILLE_CELLULE));
+    fenetre = std::make_unique<sf::RenderWindow>(taille, titreFenetre);
+    horloge.restart();
     return true;
 }
 
 void ColorerCellule(int x, int y, int r, int g, int b)
 {
-    couleurs[x][y] = sf::Color(r, g, b, 255);
-}
-
-void DessinerGrille()
-{
-    for (int i = 0; i < largeurGrille; ++i)
+    if (EstDansLaGrille(x, y))
     {
-        for (int j = 0; j < hauteurGrille; ++j)
-        {
-            sf::RectangleShape square(sf::Vector2f(TAILLE_CELLULE, TAILLE_CELLULE));
-            square.setPosition(1.f * i * TAILLE_CELLULE, 1.f * j * TAILLE_CELLULE);
-            square.setFillColor(couleurs[i][j]);
-            fenetreSFML->draw(square);
-        }
+        couleurs[y * largeurGrille + x] = sf::Color(r, g, b);
     }
 }
 
 bool FenetreEstActive()
 {
-    if (fenetreSFML == nullptr || !fenetreSFML->isOpen())
+    if (!fenetre || !fenetre->isOpen() || !TraiterEvenements())
     {
         return false;
     }
 
-    sf::Event evenement;
-    while (fenetreSFML->pollEvent(evenement))
-    { 
-        if (evenement.type == sf::Event::Closed)
-        {
-            fenetreSFML->close();
-            return false;
-        }
-    }
-
-    fenetreSFML->clear(COULEUR_VIDE);
+    fenetre->clear(COULEUR_VIDE);
     DessinerGrille();
-    fenetreSFML->display();
-
+    fenetre->display();
     return true;
 }
 
