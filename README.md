@@ -8,6 +8,7 @@
 [![SFML](https://img.shields.io/badge/SFML-2.5.1-8CC445?logo=sfml&logoColor=white)](https://www.sfml-dev.org/)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-Emscripten-654FF0?logo=webassembly&logoColor=white)](https://emscripten.org/)
 [![Plateforme](https://img.shields.io/badge/plateforme-Windows%20%7C%20Web-lightgrey)](#installation)
+[![Licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
 ### [▶ Jouer en ligne](https://nick-suebang.github.io/snake-game/)
 
@@ -191,4 +192,4 @@ Le site est servi par GitHub Pages depuis le dossier `docs/` de la branche `main
 
 ## Licence
 
-Ce projet est distribué sous licence MIT.
+Ce projet est distribué sous licence MIT. Voir le fichier [LICENSE](LICENSE).
