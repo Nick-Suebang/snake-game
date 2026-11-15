@@ -50,6 +50,32 @@ NickSuebang-TP03-Snake/
 2. Sélectionner la plateforme (x64)
 3. Compiler le projet (F5 pour débugger, Ctrl+F5 pour exécuter)
 
+## Version web (WebAssembly)
+Le même code C++ est compilé en WebAssembly avec [Emscripten](https://emscripten.org) pour être joué directement dans le navigateur, sans rien installer.
+
+- `main.cpp` est partagé entre la version Visual Studio et la version web.
+- `web/biblioJeu2D_web.cpp` remplace `biblioJeu2D.cpp` (SFML) : il dessine dans un `<canvas>` HTML et lit le clavier ou les glissements tactiles.
+- `docs/` contient la page prête à publier : `index.html`, `snake.js` et `snake.wasm`.
+
+### Recompiler
+Avec Docker, depuis la racine du dépôt :
+```bash
+docker run --rm -v "$(pwd):/src" -w /src emscripten/emsdk:3.1.74 sh web/build.sh
+```
+
+### Tester en local
+La page doit être servie par un serveur web (ouvrir le fichier directement ne charge pas le `.wasm`) :
+```bash
+npx http-server docs
+```
+
+### Publier
+Avec GitHub Pages : Settings → Pages → Source « Deploy from a branch », branche `main`, dossier `/docs`.
+Pour l'intégrer à un portfolio :
+```html
+<iframe src="https://nick-suebang.github.io/snake-game/" width="920" height="720" style="border:0"></iframe>
+```
+
 ## Dépendances
 Le projet utilise SFML pour :
 - Gestion des fenêtres

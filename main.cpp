@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
+#include <clocale>
 #include "biblioJeu2D.h"
 
 using namespace std;
@@ -158,7 +160,7 @@ int main(int argc, char* argv[])
 {
     setlocale(LC_ALL, "");
 
-    srand((unsigned int(time(0))));
+    srand(static_cast<unsigned int>(time(0)));
     if (!InitialiserFenetre(LARGEUR, HAUTEUR, "Jeu Snake")) 
     {
         cout << "Erreur lors de l'initialisation de la fenêtre!" << endl;
