@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snake en C++</title>
+  <meta name="description" content="Jeu Snake écrit en C++, compilé en WebAssembly avec Emscripten pour être joué dans le navigateur.">
+  <style>
+    :root {
+      --fond: #0e1116;
+      --carte: #171b22;
+      --bord: #2a313c;
+      --texte: #e6e9ee;
+      --discret: #8b95a5;
+      --accent: #4ade80;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--fond);
+      color: var(--texte);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    header { text-align: center; }
+    h1 { margin: 0; font-size: 1.5rem; font-weight: 650; letter-spacing: .02em; }
+    .sous-titre { margin: 4px 0 0; color: var(--discret); font-size: .9rem; text-align: center; }
+    .ecran {
+      position: relative;
+      width: min(900px, 100%);
+      aspect-ratio: 30 / 20;
+      border: 1px solid var(--bord);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      touch-action: none;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .calque {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: rgba(14, 17, 22, .82);
+      text-align: center;
+      padding: 16px;
+    }
+    .calque[hidden] { display: none; }
+    .calque p { margin: 0; color: var(--discret); }
+    .score { font-size: 2rem; font-weight: 700; color: var(--texte); }
+    button {
+      font: inherit;
+      font-weight: 600;
+      padding: 12px 28px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #052e16;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.08); }
+    button:disabled { opacity: .5; cursor: wait; }
+    button:focus-visible { outline: 3px solid var(--texte); outline-offset: 3px; }
+    .aide { color: var(--discret); font-size: .85rem; text-align: center; max-width: 60ch; }
+    kbd {
+      font-family: inherit;
+      padding: 1px 6px;
+      border: 1px solid var(--bord);
+      border-radius: 4px;
+      background: var(--carte);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Snake</h1>
+    <p class="sous-titre">Code C++ d'origine compilé en WebAssembly, exécuté directement dans votre navigateur.</p>
+  </header>
+
+  <div class="ecran" id="ecran">
+    <canvas id="canvas" width="30" height="20"></canvas>
+
+    <div class="calque" id="accueil">
+      <button id="jouer" disabled>Chargement…</button>
+      <p>Le serpent grandit tout seul chaque seconde. Évitez de vous mordre la queue !</p>
+    </div>
+
+    <div class="calque" id="fin" hidden>
+      <p>Partie terminée</p>
+      <div class="score" id="score"></div>
+      <button id="rejouer">Rejouer</button>
+    </div>
+  </div>
+
+  <p class="aide">Flèches <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> pour diriger le serpent. Sur mobile, glissez le doigt sur le jeu.</p>
+
+  <script>
+    const boutonJouer = document.getElementById('jouer');
+    const boutonRejouer = document.getElementById('rejouer');
+    const accueil = document.getElementById('accueil');
+    const fin = document.getElementById('fin');
+    const affichageScore = document.getElementById('score');
+    const ecran = document.getElementById('ecran');
+
+    // Etat des fleches lu par le C++ : 0 = haut, 1 = bas, 2 = gauche, 3 = droite.
+    const CODES = { ArrowUp: 0, ArrowDown: 1, ArrowLeft: 2, ArrowRight: 3 };
+    let partieEnCours = false;
+
+    var Module = {
+      fleches: [false, false, false, false],
+      appuisRecents: [false, false, false, false],
+      canvas: document.getElementById('canvas'),
+      // La sortie console du C++ (cout) arrive ici : on y lit le score de fin.
+      print: (texte) => {
+        console.log(texte);
+        const m = /Score:\s*(\d+)/.exec(texte);
+        if (m) terminerPartie(m[1]);
+      },
+      printErr: (texte) => console.error(texte),
+      onRuntimeInitialized: () => {
+        boutonJouer.disabled = false;
+        boutonJouer.textContent = 'Jouer';
+      },
+    };
+
+    function lancerPartie() {
+      if (partieEnCours) return;
+      partieEnCours = true;
+      accueil.hidden = true;
+      fin.hidden = true;
+      Module.fleches.fill(false);
+      Module.appuisRecents.fill(false);
+      Module.callMain([]); // execute main() du programme C++
+    }
+
+    function terminerPartie(score) {
+      partieEnCours = false;
+      affichageScore.textContent = 'Score : ' + score;
+      fin.hidden = false;
+      boutonRejouer.focus();
+    }
+
+    boutonJouer.addEventListener('click', lancerPartie);
+    boutonRejouer.addEventListener('click', lancerPartie);
+
+    // Clavier
+    window.addEventListener('keydown', (e) => {
+      if (e.key in CODES) {
+        Module.fleches[CODES[e.key]] = true;
+        Module.appuisRecents[CODES[e.key]] = true;
+        if (partieEnCours) e.preventDefault(); // evite de faire defiler la page
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key in CODES) Module.fleches[CODES[e.key]] = false;
+    });
+    window.addEventListener('blur', () => Module.fleches.fill(false));
+
+    // Glissements tactiles : simule un bref appui sur la fleche correspondante.
+    let depart = null;
+    ecran.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      depart = { x: t.clientX, y: t.clientY };
+    }, { passive: true });
+    ecran.addEventListener('touchend', (e) => {
+      if (!depart) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - depart.x;
+      const dy = t.clientY - depart.y;
+      depart = null;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+      const code = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 3 : 2) : (dy > 0 ? 1 : 0);
+      Module.appuisRecents[code] = true;
+    });
+  </script>
+  <script src="snake.js"></script>
+</body>
+</html>
