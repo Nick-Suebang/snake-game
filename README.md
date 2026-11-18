@@ -186,9 +186,14 @@ Le site est servi par GitHub Pages depuis le dossier `docs/` de la branche `main
 - Ajouter une pause et un écran de fin dans la version Windows
 - Ajouter des tests unitaires de la logique du jeu, exécutés automatiquement par GitHub Actions
 
-## Auteur
+## Auteur et contact
 
-**Nick Suebang** · [GitHub](https://github.com/Nick-Suebang)
+**Nick Suebang** (Nick Hariel Teponno Suebang), technicien en informatique et développeur web et mobile à Rimouski (QC).
+
+- Portfolio : [nicksuebang.com](https://nicksuebang.com)
+- Courriel : [contact@nicksuebang.com](mailto:contact@nicksuebang.com)
+- GitHub : [@Nick-Suebang](https://github.com/Nick-Suebang)
+- LinkedIn : [Nick Hariel Teponno Suebang](https://www.linkedin.com/in/nick-hariel-teponno-suebang-6a8875292/)
 
 ## Licence
 

@@ -77,6 +77,9 @@
     button:disabled { opacity: .5; cursor: wait; }
     button:focus-visible { outline: 3px solid var(--texte); outline-offset: 3px; }
     .aide { color: var(--discret); font-size: .85rem; text-align: center; max-width: 60ch; }
+    .credit { color: var(--discret); font-size: .78rem; text-align: center; max-width: 70ch; }
+    .credit p { margin: 0 0 4px; }
+    .credit a { color: var(--accent); }
     kbd {
       font-family: inherit;
       padding: 1px 6px;
@@ -108,6 +111,11 @@
   </div>
 
   <p class="aide">Flèches <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> pour diriger le serpent. Sur mobile, glissez le doigt sur le jeu.</p>
+
+  <footer class="credit">
+    <p>Projet de <a href="https://nicksuebang.com">Nick Suebang</a> · <a href="mailto:contact@nicksuebang.com">contact@nicksuebang.com</a> · <a href="https://github.com/Nick-Suebang/snake-game">Code source</a> · <a href="https://www.linkedin.com/in/nick-hariel-teponno-suebang-6a8875292/">LinkedIn</a></p>
+    <p>Aucune donnée personnelle n’est recueillie : le programme s’exécute entièrement dans votre navigateur, sans témoins (cookies). Le site est hébergé par GitHub Pages, qui peut conserver des journaux techniques (adresse IP).</p>
+  </footer>
 
   <script>
     const boutonJouer = document.getElementById('jouer');
